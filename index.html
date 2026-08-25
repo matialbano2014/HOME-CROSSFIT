@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<link rel="manifest" href="manifest.json">
+<title>Home CrossFit</title>
+<style>
+:root{--bg:#080b0e;--card:#14191e;--text:#f7f7f7;--muted:#9da6ae;--accent:#49c51c;--ok:#49c51c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:720px;margin:auto;padding:18px 16px 90px}.top{display:flex;justify-content:space-between;align-items:center}.brand{font-weight:900;font-size:24px}.pill{background:#22262c;padding:8px 12px;border-radius:999px;color:var(--muted)}
+.card{background:linear-gradient(145deg,#171d22,#101419);border:1px solid #262e35;border-radius:20px;padding:18px;margin:14px 0;box-shadow:0 14px 34px #0007}.hero h1{font-size:30px;margin:6px 0}.muted{color:var(--muted)}
+button,select{font:inherit}.btn{width:100%;border:0;border-radius:13px;padding:16px;font-weight:900;font-size:16px;background:linear-gradient(180deg,#55d323,#37a914);color:white;margin-top:10px;box-shadow:0 8px 22px #38b41533}.secondary{background:#2a2e35}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.setting{background:#20242a;border-radius:14px;padding:12px}.setting label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}.setting select{width:100%;background:#111419;color:white;border:0;border-radius:10px;padding:10px}
+.exercise{font-size:34px;font-weight:900;text-align:center;margin:22px 0 8px}.timer{font-size:78px;font-weight:950;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:-4px;text-shadow:0 5px 22px #000}.phase{text-align:center;font-weight:800;color:var(--ok);font-size:18px}.progress{height:8px;background:#292d33;border-radius:9px;overflow:hidden;margin:16px 0}.progress>div{height:100%;background:var(--accent)}
+.row{display:flex;justify-content:space-between;gap:12px}.stat{flex:1;text-align:center;background:#20242a;padding:12px;border-radius:14px}.stat b{font-size:22px;display:block}
+.hidden{display:none}.list{line-height:1.7;padding-left:18px}.small{font-size:13px}.warn{border-left:4px solid var(--accent);padding-left:12px}
+
+.demo{background:radial-gradient(circle at 50% 35%,#313942 0,#171c21 42%,#0b0e11 100%);border-radius:18px;padding:14px;margin:16px 0;text-align:center;border:1px solid #313a42;box-shadow:inset 0 0 45px #0008;position:relative;overflow:hidden}
+.demo svg{width:100%;max-width:330px;height:210px;overflow:visible;filter:drop-shadow(0 10px 9px #0008)}
+.demo-title{font-weight:800;margin-top:6px}
+.demo-tip{color:var(--muted);font-size:14px;line-height:1.35;margin-top:6px}
+.figure-line{stroke:#d7a77d;stroke-width:11;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.figure-joint{fill:#d7a77d;stroke:#f1c49c;stroke-width:2}
+.figure-floor{stroke:#4c535e;stroke-width:3}
+.demo .moving{transform-box:fill-box;transform-origin:center}
+@keyframes pulseMove{0%,100%{transform:translateY(0)}50%{transform:translateY(16px)}}
+@keyframes pushMove{0%,100%{transform:translateY(0)}50%{transform:translateY(13px)}}
+@keyframes climberMove{0%,100%{transform:translateX(0)}50%{transform:translateX(14px)}}
+@keyframes jumpMove{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+@keyframes bridgeMove{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-10deg)}}
+.demo.animate-squat .moving{animation:pulseMove 1.2s infinite ease-in-out}
+.demo.animate-push .moving{animation:pushMove 1.0s infinite ease-in-out}
+.demo.animate-climber .moving{animation:climberMove .8s infinite ease-in-out}
+.demo.animate-jump .moving{animation:jumpMove 1.0s infinite ease-in-out}
+.demo.animate-bridge .moving{animation:bridgeMove 1.2s infinite ease-in-out}
+
+
+.timerRing{width:220px;height:220px;margin:12px auto;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(var(--accent) 0deg,#242b31 0deg);padding:10px;box-shadow:0 0 30px #49c51c18}
+.timerInner{width:100%;height:100%;border-radius:50%;background:#0d1115;display:flex;align-items:center;justify-content:center}
+.timerInner .timer{font-size:62px}
+.tech{margin-top:12px;text-align:left;background:#11161a;border-radius:14px;padding:12px}
+.tech b{display:block;margin-bottom:6px}.tech div{color:#cbd1d6;font-size:13px;line-height:1.45}
+
+.realTrainer{height:230px;position:relative;margin:auto;max-width:360px;background:linear-gradient(#e9e9e7 0 78%,#c8c5bf 78% 80%,#dedbd4 80%);border-radius:14px;overflow:hidden}
+.person{position:absolute;left:50%;top:48%;width:92px;height:170px;transform:translate(-50%,-50%);transition:.35s}
+.head{position:absolute;width:30px;height:36px;border-radius:48% 48% 44% 44%;background:#c88f68;left:31px;top:0;box-shadow:inset -6px -3px #a96f50}
+.hair{position:absolute;width:30px;height:12px;background:#29231f;left:31px;top:0;border-radius:50% 50% 25% 20%}
+.body{position:absolute;width:48px;height:65px;left:22px;top:34px;background:linear-gradient(90deg,#202225,#090a0b);border-radius:15px 15px 10px 10px}
+.shorts{position:absolute;width:51px;height:34px;left:21px;top:91px;background:#111;border-radius:4px 4px 12px 12px}
+.limb{position:absolute;background:#c88f68;border-radius:12px;transform-origin:8px 8px;box-shadow:inset -3px 0 #a96f50}
+.armL,.armR{width:16px;height:66px;top:42px}.armL{left:21px;transform:rotate(74deg)}.armR{left:55px;transform:rotate(-74deg)}
+.legL,.legR{width:19px;height:74px;top:116px}.legL{left:26px;transform:rotate(7deg)}.legR{left:49px;transform:rotate(-7deg)}
+.shoe{position:absolute;width:31px;height:12px;background:#151719;border-radius:8px 12px 5px 5px;bottom:-7px;left:-5px}
+.pose-squat .person{top:62%;transform:translate(-50%,-50%) scaleY(.88)}
+.pose-squat .body{transform:rotate(8deg)}
+.pose-squat .legL{transform:rotate(48deg);height:65px}.pose-squat .legR{transform:rotate(-48deg);height:65px}
+.pose-squat .armL{transform:rotate(88deg);height:72px}.pose-squat .armR{transform:rotate(-88deg);height:72px}
+.pose-lunge .legL{transform:rotate(48deg)}.pose-lunge .legR{transform:rotate(-38deg)}
+.pose-plank .person,.pose-push .person,.pose-climber .person{transform:translate(-50%,-50%) rotate(78deg);top:58%}
+.pose-bridge .person{transform:translate(-50%,-50%) rotate(90deg);top:59%}
+.pose-superman .person,.pose-hollow .person{transform:translate(-50%,-50%) rotate(90deg);top:56%}
+.pose-jump .person{animation:realJump 1s infinite ease-in-out}
+.pose-run .person{animation:realRun .7s infinite ease-in-out}
+.pose-squat .person{animation:realSquat 1.25s infinite ease-in-out}
+.pose-push .person{animation:realPush 1.05s infinite ease-in-out}
+@keyframes realSquat{0%,100%{top:48%;transform:translate(-50%,-50%) scaleY(1)}50%{top:62%;transform:translate(-50%,-50%) scaleY(.88)}}
+@keyframes realJump{0%,100%{top:48%}50%{top:35%}}
+@keyframes realRun{0%,100%{left:48%}50%{left:52%}}
+@keyframes realPush{0%,100%{top:55%}50%{top:63%}}
+.stageLabel{position:absolute;left:12px;top:12px;background:#111c;color:white;padding:6px 9px;border-radius:8px;font-size:11px;font-weight:800}
+
+
+.navBtn{border:0;background:transparent;color:#89939c;font-size:20px;min-width:70px;padding:5px 4px;border-radius:10px}.navBtn small{display:block;font-size:10px;margin-top:2px}.navBtn.active{color:var(--accent);background:#162016}.tabPage{display:none}.tabPage.active{display:block}
+.exerciseCard{background:#151a1f;border:1px solid #283038;border-radius:15px;padding:13px;margin:10px 0}.exerciseCard b{font-size:16px}.exerciseCard p{color:var(--muted);font-size:13px;margin:6px 0 0}
+
+.countdownOverlay{position:fixed;inset:0;background:#050709d9;display:none;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px)}
+.countdownOverlay.show{display:flex}.countdownNumber{font-size:150px;font-weight:950;color:#fff;text-shadow:0 0 40px #49c51c;animation:countPop .7s ease-out}
+@keyframes countPop{0%{transform:scale(.55);opacity:.2}45%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:.9}}
+.backHome{width:100%;border:1px solid #343c43;background:#161b20;color:white;border-radius:12px;padding:12px;font-weight:800;margin:0 0 12px}
+.danger{background:#441b1b!important;border:1px solid #7b3232!important;color:#ffdada!important}
+
+
+.navActions{display:flex;gap:8px;margin:4px 0 12px}
+.navActions button{flex:1;border:1px solid #343c43;background:#161b20;color:#fff;border-radius:12px;padding:11px 10px;font-weight:800}
+.navActions .homeBtn{border-color:#3e7d2d;color:#9cf477}
+
+
+.secondaryNav{display:flex;gap:10px;margin:8px 0 14px}
+.secondaryNav button{flex:1;border:1px solid #374047;background:#171c21;color:#fff;border-radius:13px;padding:12px 10px;font-weight:850;font-size:14px}
+.secondaryNav .home{border-color:#3f7e31;color:#9df57b}
+
+
+.audioPanel{background:#10161b;border:1px solid #2d363d;border-radius:16px;padding:14px;margin:12px 0}
+.audioPanel strong{display:block;margin-bottom:6px}
+.audioStatus{font-size:13px;color:var(--muted);margin-top:8px}
+.audioBtnRow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.audioBtn{border:0;border-radius:12px;padding:12px;font-weight:850;background:#1d252b;color:#fff}
+.audioBtn.primary{background:var(--accent);color:#071006}
+</style>
+</head>
+<body><div id="countdownOverlay" class="countdownOverlay"><div id="countdownNumber" class="countdownNumber">3</div></div>
+<main>
+<div class="top"><div class="brand">HOME CROSSFIT</div><div class="pill" id="streak">🔥 0 días</div></div>
+
+<section id="home" class="tabPage active">
+<div class="card hero">
+<div class="muted" id="date"></div><h1>Entrenamiento de hoy</h1>
+<p id="summary"></p><div class="audioPanel">
+<strong>🔊 Sonido en iPhone</strong>
+<div class="audioBtnRow">
+<button class="audioBtn primary" onclick="unlockAudio()">Activar sonido</button>
+<button class="audioBtn" onclick="testAudio()">Probar sonido</button>
+</div>
+<div class="audioStatus" id="audioStatus">Tocá “Activar sonido” una vez antes de entrenar.</div>
+</div>
+<div class="grid">
+<div class="setting"><label>NIVEL</label><select id="level"><option>Inicial</option><option selected>Intermedio</option><option>Avanzado</option></select></div>
+<div class="setting"><label>DURACIÓN</label><select id="duration"><option value="15">15 min</option><option value="25" selected>25 min</option><option value="35">35 min</option><option value="45">45 min</option></select></div>
+</div>
+<div class="grid">
+<button class="btn secondary" onclick="setMode('easy')">Hoy estoy cansado</button>
+<button class="btn secondary" onclick="setMode('hard')">Quiero entrenar fuerte</button>
+</div>
+<button class="btn" onclick="startWorkout()">▶ COMENZAR ENTRENAMIENTO</button><button class="btn secondary" onclick="previewToday()">VER EJERCICIOS DE HOY</button>
+<div id="previewPanel" class="card hidden"><b>Demostraciones de hoy</b><div id="previewList"></div></div>
+</div>
+
+<div class="card"><b>Plan semanal</b><ul class="list" id="week"></ul></div>
+<div class="card"><b>Tu progreso</b><div class="row"><div class="stat"><b id="done">0</b>sesiones</div><div class="stat"><b id="mins">0</b>minutos</div><div class="stat"><b id="best">0</b>mejor racha</div></div></div>
+<div class="card small warn">Entrená con técnica controlada. Si aparece dolor agudo, mareo, dolor de pecho o falta de aire fuera de lo esperable, detené la sesión. El programa prioriza progresión gradual, no agotamiento máximo diario.</div>
+<div id="bottomNav" style="position:fixed;bottom:0;left:0;right:0;background:#0c1013ee;border-top:1px solid #252c32;padding:8px 8px max(8px,env(safe-area-inset-bottom));display:flex;justify-content:space-around;z-index:20;backdrop-filter:blur(14px)">
+<button class="navBtn active" onclick="showTab('home',this)">⌂<small>Inicio</small></button>
+<button class="navBtn" onclick="showTab('routines',this)">⏱<small>Rutinas</small></button>
+<button class="navBtn" onclick="showTab('exercises',this)">◉<small>Ejercicios</small></button>
+<button class="navBtn" onclick="showTab('history',this)">▥<small>Historial</small></button>
+</div>
+</section>
+
+<section id="routines" class="tabPage">
+<div class="secondaryNav"><button onclick="goBackTab()">← Volver atrás</button><button class="home" onclick="goHome()">⌂ Inicio</button></div>
+<div class="card"><h2>Rutinas</h2><p class="muted">Elegí una sesión según tu tiempo y energía.</p>
+<div id="routineCards"></div></div></section>
+<section id="exercises" class="tabPage">
+<div class="secondaryNav"><button onclick="goBackTab()">← Volver atrás</button><button class="home" onclick="goHome()">⌂ Inicio</button></div>
+<div class="card"><h2>Ejercicios</h2><p class="muted">Guía rápida de técnica y movimiento.</p><div id="exerciseLibrary"></div></div></section>
+<section id="history" class="tabPage">
+<div class="secondaryNav"><button onclick="goBackTab()">← Volver atrás</button><button class="home" onclick="goHome()">⌂ Inicio</button></div>
+<div class="card"><h2>Historial</h2><div id="historyList"></div></div>
+<button class="backHome danger" onclick="resetHistory()">🗑 Reiniciar historial</button>
+</section>
+<section id="workout" class="hidden">
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>TABATA</b><span class="pill" id="roundBadge">1 / 8</span></div><div class="phase" id="phase">PREPARATE</div>
+<div class="exercise" id="exercise">Sentadillas</div>
+<div class="demo" id="demo">
+  <div id="demoGraphic"></div>
+  <div class="demo-title" id="demoTitle">Demostración</div>
+  <div class="tech"><b>✓ TÉCNICA</b><div id="demoTip"></div></div>
+</div>
+<div class="timerRing" id="timerRing"><div class="timerInner"><div class="timer" id="timer">00:20</div></div></div>
+<div class="progress"><div id="bar" style="width:0%"></div></div><div class="muted small" style="text-align:center">🔊 Sonido: inicio · descanso · final</div>
+<p class="muted" id="instruction" style="text-align:center"></p>
+<div class="row"><button class="btn secondary" onclick="swapExercise()">Cambiar ejercicio</button><button class="btn secondary" onclick="togglePause()" id="pause">Pausar</button></div>
+<button class="btn" onclick="finishWorkout()">Finalizar sesión</button>
+</div>
+</section>
+</main>
+<script>
+const plans={
+0:{name:"Piernas + Core",ex:["Sentadillas","Estocadas alternadas","Puente de glúteos","Plancha","Mountain climbers","Sentadilla isométrica","Dead bug","Jumping jacks"]},
+1:{name:"Metabólico",ex:["Jumping jacks","Burpees","Mountain climbers","Sentadillas","Rodillas arriba","Flexiones","Skaters","Plancha"]},
+2:{name:"Torso + Core",ex:["Flexiones","Plancha con toque de hombro","Superman","Flexiones con rodillas","Hollow hold","Mountain climbers","Plancha lateral","Dead bug"]},
+3:{name:"Movilidad + Recuperación",ex:["Sentadilla controlada","Puente de glúteos","Bird dog","Dead bug","Superman","Plancha","Estocada atrás","Marcha rápida"]},
+4:{name:"Full Body",ex:["Burpees","Sentadillas","Flexiones","Estocadas","Mountain climbers","Puente de glúteos","Plancha","Jumping jacks"]},
+5:{name:"Tabata Challenge",ex:["Sentadillas","Flexiones","Mountain climbers","Burpees","Estocadas","Plancha","Skaters","Rodillas arriba"]},
+6:{name:"Descanso / movilidad",ex:["Marcha suave","Bird dog","Puente de glúteos","Dead bug","Superman","Plancha suave","Estocada atrás","Respiración"]}}
+
+const demoData={
+"Sentadillas":{type:"squat",tip:"Pies al ancho de hombros. Bajá la cadera hacia atrás y mantené el pecho erguido."},
+"Sentadilla isométrica":{type:"squat",tip:"Bajá hasta una posición cómoda y sostené sin perder la espalda neutra."},
+"Sentadilla + alcance":{type:"squat",tip:"Hacé una sentadilla controlada y al subir extendé los brazos arriba."},
+"Estocadas alternadas":{type:"lunge",tip:"Paso amplio, rodilla delantera alineada con el pie y tronco erguido."},
+"Estocadas":{type:"lunge",tip:"Paso amplio, bajá ambas rodillas con control y alterná."},
+"Estocada atrás":{type:"lunge",tip:"Llevá un pie hacia atrás y bajá verticalmente manteniendo estabilidad."},
+"Puente de glúteos":{type:"bridge",tip:"Empujá el piso con los talones y elevá la cadera contrayendo glúteos."},
+"Plancha":{type:"plank",tip:"Cuerpo en línea recta. Abdomen firme y cadera ni muy alta ni caída."},
+"Plancha suave":{type:"plank",tip:"Mantené la línea del cuerpo; apoyá rodillas si necesitás reducir dificultad."},
+"Plancha con toque de hombro":{type:"plank",tip:"Desde plancha, tocá hombros alternando sin balancear demasiado la cadera."},
+"Plancha lateral":{type:"sideplank",tip:"Apoyá antebrazo, alineá hombro-cadera-tobillo y elevá la cadera."},
+"Mountain climbers":{type:"climber",tip:"Desde plancha, llevá rodillas al pecho alternando con abdomen firme."},
+"Flexiones":{type:"push",tip:"Manos debajo de hombros. Bajá el pecho con el cuerpo alineado y empujá fuerte."},
+"Flexiones con rodillas":{type:"pushknees",tip:"Apoyá las rodillas y mantené una línea recta de cabeza a rodillas."},
+"Burpees":{type:"burpee",tip:"Bajá al suelo con control, extendé piernas y volvé de pie. Saltá si te resulta cómodo."},
+"Jumping jacks":{type:"jump",tip:"Abrí piernas y brazos coordinadamente. Aterrizá suave."},
+"Rodillas arriba":{type:"run",tip:"Elevá rodillas a ritmo sostenido manteniendo postura alta."},
+"Marcha rápida":{type:"run",tip:"Marchá en el lugar elevando rodillas sin impacto."},
+"Marcha suave":{type:"run",tip:"Movimiento suave para recuperar, respirando de forma controlada."},
+"Skaters":{type:"skater",tip:"Desplazate lateralmente de un pie al otro con rodillas flexionadas."},
+"Paso lateral":{type:"skater",tip:"Paso lateral sin salto, manteniendo rodillas suaves."},
+"Superman":{type:"superman",tip:"Boca abajo, elevá brazos y piernas suavemente sin hiperextender la zona lumbar."},
+"Hollow hold":{type:"hollow",tip:"Pegá la zona lumbar al suelo y extendé brazos y piernas según tu nivel."},
+"Dead bug":{type:"deadbug",tip:"Espalda baja apoyada. Extendé brazo y pierna opuestos lentamente."},
+"Bird dog":{type:"birddog",tip:"En cuatro apoyos, extendé brazo y pierna opuestos sin rotar la pelvis."},
+"Respiración":{type:"breath",tip:"Inhalá por nariz, expandí abdomen y exhalá lento."}
+};
+
+function svgDemo(type){
+const baseOpen='<svg viewBox="0 0 320 190" aria-label="Demostración gráfica"><line x1="20" y1="172" x2="300" y2="172" class="figure-floor"/>';
+const close='</svg>';
+let s='';
+if(type==="squat") s=`<g class="moving"><circle cx="160" cy="45" r="16" class="figure-joint"/><path d="M160 62 L160 105 M160 78 L125 92 M160 78 L195 92 M160 105 L135 140 M160 105 L190 140 M135 140 L115 166 M190 140 L215 166" class="figure-line"/></g>`;
+else if(type==="lunge") s=`<g class="moving"><circle cx="160" cy="42" r="16" class="figure-joint"/><path d="M160 60 L160 105 M160 78 L132 93 M160 78 L188 93 M160 105 L122 142 M122 142 L92 168 M160 105 L204 135 M204 135 L230 168" class="figure-line"/></g>`;
+else if(type==="bridge") s=`<g class="moving"><circle cx="92" cy="128" r="14" class="figure-joint"/><path d="M106 128 L155 112 L205 128 M155 112 L155 82 M205 128 L232 166 M92 142 L74 166" class="figure-line"/></g>`;
+else if(type==="plank"||type==="sideplank") s=`<g><circle cx="88" cy="108" r="14" class="figure-joint"/><path d="M102 112 L165 118 L230 132 M120 114 L105 152 M165 118 L157 154 M230 132 L258 158" class="figure-line"/></g>`;
+else if(type==="push"||type==="pushknees") s=`<g class="moving"><circle cx="88" cy="105" r="14" class="figure-joint"/><path d="M102 110 L162 117 L226 134 M120 113 L110 150 M120 113 L132 150 M226 134 L255 160" class="figure-line"/></g>`;
+else if(type==="climber") s=`<g class="moving"><circle cx="88" cy="105" r="14" class="figure-joint"/><path d="M102 110 L162 118 L225 130 M120 113 L109 150 M162 118 L145 150 M225 130 L255 160" class="figure-line"/></g>`;
+else if(type==="jump"||type==="run"||type==="skater"||type==="burpee") s=`<g class="moving"><circle cx="160" cy="43" r="16" class="figure-joint"/><path d="M160 60 L160 108 M160 75 L124 51 M160 75 L198 50 M160 108 L132 157 M160 108 L193 157" class="figure-line"/></g>`;
+else if(type==="superman"||type==="hollow") s=`<g class="moving"><circle cx="85" cy="127" r="14" class="figure-joint"/><path d="M100 126 L160 124 L225 115 M116 125 L78 105 M225 115 L270 95" class="figure-line"/></g>`;
+else if(type==="deadbug") s=`<g><circle cx="160" cy="132" r="14" class="figure-joint"/><path d="M145 126 L112 105 M175 126 L207 105 M150 140 L124 165 M170 140 L199 165" class="figure-line"/></g>`;
+else if(type==="birddog") s=`<g><circle cx="115" cy="103" r="14" class="figure-joint"/><path d="M129 107 L172 118 M145 112 L110 145 M172 118 L207 145 M145 112 L98 80 M172 118 L226 89" class="figure-line"/></g>`;
+else s=`<g class="moving"><circle cx="160" cy="45" r="16" class="figure-joint"/><path d="M160 62 L160 112 M160 78 L128 96 M160 78 L192 96 M160 112 L140 162 M160 112 L180 162" class="figure-line"/></g>`;
+return baseOpen+s+close;
+}
+function renderDemo(name){
+ let d=demoData[name]||{type:"stand",tip:"Movete con control y priorizá una técnica cómoda."};
+ let map={squat:"squat",lunge:"lunge",bridge:"bridge",plank:"plank",sideplank:"plank",push:"push",pushknees:"push",climber:"climber",jump:"jump",run:"run",skater:"lunge",burpee:"push",superman:"superman",hollow:"hollow",deadbug:"bridge",birddog:"plank",breath:"stand"};
+ let pose=map[d.type]||"stand";
+ el("demo").className="demo";
+ el("demo").style.display="block";
+ el("demoGraphic").innerHTML=`<div class="realTrainer pose-${pose}">
+ <span class="stageLabel">DEMOSTRACIÓN</span>
+ <div class="person">
+   <div class="head"></div><div class="hair"></div><div class="body"></div><div class="shorts"></div>
+   <div class="limb armL"></div><div class="limb armR"></div>
+   <div class="limb legL"><div class="shoe"></div></div><div class="limb legR"><div class="shoe"></div></div>
+ </div></div>`;
+ el("demoTitle").textContent=name;
+ el("demoTip").textContent=d.tip;
+}
+
+let mode="normal", running=false, paused=false, idx=0, phase="work", remaining=20, timerId=null, sessionMinutes=25;
+const day=(new Date().getDay()+6)%7;
+const names=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+function el(x){return document.getElementById(x)}
+let currentTab="home";
+let previousTabs=[];
+
+function showTab(id,btn){
+ if(id!==currentTab){
+   previousTabs.push(currentTab);
+   if(previousTabs.length>20) previousTabs.shift();
+   currentTab=id;
+ }
+ document.querySelectorAll('.tabPage').forEach(x=>x.classList.remove('active'));
+ let page=el(id); if(page) page.classList.add('active');
+ document.querySelectorAll('.navBtn').forEach(x=>x.classList.remove('active'));
+ if(btn) btn.classList.add('active');
+ if(id==='routines') renderRoutines();
+ if(id==='exercises') renderExerciseLibrary();
+ if(id==='history') renderHistory();
+ window.scrollTo(0,0);
+}
+
+function goBackTab(){
+ let prev=previousTabs.pop() || "home";
+ currentTab=prev;
+ document.querySelectorAll('.tabPage').forEach(x=>x.classList.remove('active'));
+ let page=el(prev); if(page) page.classList.add('active');
+ document.querySelectorAll('.navBtn').forEach(x=>x.classList.remove('active'));
+ let tabs=[...document.querySelectorAll('.navBtn')];
+ let map={home:0,routines:1,exercises:2,history:3};
+ if(tabs[map[prev]]) tabs[map[prev]].classList.add('active');
+ if(prev==='routines') renderRoutines();
+ if(prev==='exercises') renderExerciseLibrary();
+ if(prev==='history') renderHistory();
+ window.scrollTo(0,0);
+}
+
+function goHome(){
+ if(currentTab!=="home") previousTabs.push(currentTab);
+ currentTab="home";
+ document.querySelectorAll('.tabPage').forEach(x=>x.classList.remove('active'));
+ let page=el("home"); if(page) page.classList.add('active');
+ document.querySelectorAll('.navBtn').forEach(x=>x.classList.remove('active'));
+ let first=document.querySelector('.navBtn'); if(first) first.classList.add('active');
+ window.scrollTo(0,0);
+}
+function renderRoutines(){
+ let box=el('routineCards'); if(!box)return;
+ box.innerHTML=names.map((n,i)=>`<div class="exerciseCard"><b>${n} · ${plans[i].name}</b><p>${plans[i].ex.join(' · ')}</p></div>`).join('');
+}
+function renderExerciseLibrary(){
+ let box=el('exerciseLibrary'); if(!box)return;
+ let all=[...new Set(Object.values(plans).flatMap(x=>x.ex))];
+ box.innerHTML=all.map(x=>`<div class="exerciseCard"><b>${x}</b><p>${(demoData[x]||{}).tip||'Movimiento controlado y técnica estable.'}</p></div>`).join('');
+}
+function renderHistory(){
+ let box=el('historyList'); if(!box)return;
+ let h=JSON.parse(localStorage.getItem('hc_hist')||'[]').slice().reverse();
+ box.innerHTML=h.length?h.map(x=>`<div class="exerciseCard"><b>${x.date}</b><p>${x.plan} · ${x.mins} min</p></div>`).join(''):'<p class="muted">Todavía no hay sesiones registradas.</p>';
+}
+function load(){
+ el("date").textContent=new Date().toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"});
+ el("summary").innerHTML=`🔥 ${plans[day].name}<br>⚡ WOD corporal + ⏱️ Tabata + 🧘 movilidad`;
+ el("week").innerHTML=names.map((n,i)=>`<li><b>${n}:</b> ${plans[i].name}</li>`).join("");
+ let h=JSON.parse(localStorage.getItem("hc_hist")||"[]"); let mins=h.reduce((a,b)=>a+b.mins,0);
+ el("done").textContent=h.length; el("mins").textContent=mins;
+ let best=calcStreak(h); el("best").textContent=best; el("streak").textContent=`🔥 ${best} días`;
+}
+function calcStreak(h){if(!h.length)return 0;let dates=[...new Set(h.map(x=>x.date))].sort().reverse();let s=1;for(let i=1;i<dates.length;i++){let a=new Date(dates[i-1]),b=new Date(dates[i]);if((a-b)/86400000===1)s++;else break}return s}
+function setMode(m){mode=m;alert(m==="easy"?"Sesión reducida: menos rondas y movimientos sin salto.":"Sesión intensa: más rondas manteniendo buena técnica.")}
+function previewToday(){
+ let p=el("previewPanel"); p.classList.toggle("hidden");
+ el("previewList").innerHTML=plans[day].ex.map((x,i)=>`<div style="padding:10px 0;border-bottom:1px solid #293039"><b>${i+1}. ${x}</b><div class="muted small">${(demoData[x]||{}).tip||""}</div></div>`).join("");
+}
+
+function startWorkout(){
+ const ctx=ensureAudioContext();
+ if(ctx && ctx.state==="suspended"){ try{ctx.resume();}catch(e){} }
+ audioUnlocked=!!ctx && ctx.state==="running";
+
+ sessionMinutes=+el("duration").value; idx=0; phase="work"; remaining=workTime(); running=true; paused=false;
+ document.querySelectorAll(".tabPage").forEach(x=>x.style.display="none");el("workout").classList.remove("hidden");el("bottomNav").style.display="none";show();
+ clearInterval(timerId);timerId=setInterval(tick,1000); soundStart(); navigator.vibrate?.([100,70,180]);
+}
+function workTime(){return mode==="easy"?20:mode==="hard"?30:20}
+function restTime(){return mode==="hard"?10:10}
+function totalIntervals(){let base=sessionMinutes<=15?8:sessionMinutes<=25?16:sessionMinutes<=35?24:32;return mode==="easy"?Math.max(8,base-8):mode==="hard"?base+8:base}
+function currentExercise(){let e=plans[day].ex[idx%plans[day].ex.length];if(mode==="easy"){e=e.replace("Burpees","Sentadilla + alcance").replace("Jumping jacks","Paso lateral").replace("Rodillas arriba","Marcha rápida").replace("Skaters","Paso lateral")}return e}
+function show(){
+ el("phase").textContent=phase==="work"?"TRABAJO":"DESCANSO";
+ el("phase").style.color=phase==="work"?"#39d98a":"#ffb020";
+ let shownExercise=phase==="work"?currentExercise():"Respirá y preparate";
+ el("exercise").textContent=shownExercise;
+ if(phase==="work"){renderDemo(currentExercise()); el("demo").style.display="block"}else{el("demo").style.display="none"};
+ el("timer").textContent="00:"+String(remaining).padStart(2,"0");
+ el("instruction").textContent=`Intervalo ${Math.min(idx+1,totalIntervals())} de ${totalIntervals()} · ${el("level").value}`;
+ el("bar").style.width=(idx/totalIntervals()*100)+"%";
+ let maxT=phase==="work"?workTime():restTime();
+ let deg=Math.max(0,Math.min(360,(remaining/maxT)*360));
+ el("timerRing").style.background=`conic-gradient(var(--accent) ${deg}deg,#242b31 ${deg}deg)`;
+ el("roundBadge").textContent=`${Math.min(idx+1,totalIntervals())} / ${totalIntervals()}`;
+}
+function tick(){
+ if(paused)return;
+ remaining--;
+
+ // Audible/visual 3-2-1 at the end of EVERY phase.
+ if(remaining>0 && remaining<=3){
+   soundCountdown();
+   showCountdown(remaining);
+ }
+
+ if(remaining<=0){
+   if(phase==="work"){
+     // Strong end-of-exercise cue.
+     soundRest();
+     navigator.vibrate?.([180,80,180]);
+     phase="rest";
+     remaining=restTime();
+   }else{
+     idx++;
+     if(idx>=totalIntervals()){
+       soundFinish();
+       navigator.vibrate?.([180,80,180,80,300]);
+       finishWorkout(true);
+       return;
+     }
+     // Distinct transition between exercises, then work-start cue.
+     soundNextExercise();
+     setTimeout(()=>soundStart(),320);
+     navigator.vibrate?.([100,60,180]);
+     phase="work";
+     remaining=workTime();
+   }
+ }
+ show();
+}
+function togglePause(){paused=!paused;el("pause").textContent=paused?"Continuar":"Pausar"}
+function swapExercise(){idx++;show()}
+function finishWorkout(auto=false){
+ clearInterval(timerId);running=false;
+ if(!auto){soundFinish();navigator.vibrate?.([180,80,180,80,300]);}
+ let h=JSON.parse(localStorage.getItem("hc_hist")||"[]");
+ h.push({date:new Date().toISOString().slice(0,10),mins:sessionMinutes,plan:plans[day].name});
+ localStorage.setItem("hc_hist",JSON.stringify(h));
+ el("workout").classList.add("hidden");
+ el("home").classList.remove("hidden");
+ load();
+ alert("Sesión registrada. Buen trabajo.");
+}
+let audioCtx=null;
+let audioUnlocked=false;
+
+function ensureAudioContext(){
+ try{
+   if(!audioCtx){
+     const AC=window.AudioContext||window.webkitAudioContext;
+     if(!AC) return null;
+     audioCtx=new AC();
+   }
+   return audioCtx;
+ }catch(e){ return null; }
+}
+
+async function unlockAudio(){
+ const ctx=ensureAudioContext();
+ const s=el("audioStatus");
+ if(!ctx){ if(s)s.textContent="Este navegador no habilitó audio web."; return; }
+ try{
+   if(ctx.state==="suspended") await ctx.resume();
+   const buffer=ctx.createBuffer(1,1,22050);
+   const source=ctx.createBufferSource();
+   source.buffer=buffer; source.connect(ctx.destination); source.start(0);
+   audioUnlocked=(ctx.state==="running");
+   beep(880,120,.20,0); beep(1120,180,.22,150);
+   if(s)s.textContent=audioUnlocked?"✅ Sonido activado.":"⚠️ Tocá nuevamente “Activar sonido”.";
+   localStorage.setItem("hc_audio_unlocked","1");
+ }catch(e){
+   if(s)s.textContent="⚠️ No se pudo activar. Subí el volumen y tocá otra vez.";
+ }
+}
+
+function beep(freq,dur,vol=.16,delay=0){
+ setTimeout(async ()=>{
+   try{
+     const ctx=ensureAudioContext();
+     if(!ctx) return;
+     if(ctx.state==="suspended"){ try{await ctx.resume()}catch(e){} }
+     if(ctx.state!=="running") return;
+     const o=ctx.createOscillator(), g=ctx.createGain();
+     o.connect(g); g.connect(ctx.destination); o.type="sine"; o.frequency.value=freq;
+     const now=ctx.currentTime;
+     g.gain.setValueAtTime(.0001,now);
+     g.gain.exponentialRampToValueAtTime(Math.max(.001,vol),now+.015);
+     g.gain.exponentialRampToValueAtTime(.0001,now+dur/1000);
+     o.start(now); o.stop(now+dur/1000+.03);
+   }catch(e){}
+ },delay);
+}
+
+function testAudio(){
+ unlockAudio().then(()=>{
+   setTimeout(()=>{
+     beep(700,130,.22,0); beep(900,150,.24,160); beep(1180,240,.26,350);
+   },260);
+ });
+}
+
+function showCountdown(n){
+ let o=el("countdownOverlay"), x=el("countdownNumber");
+ if(!o||!x)return;
+ x.textContent=n;
+ x.style.animation="none"; void x.offsetWidth; x.style.animation="";
+ o.classList.add("show");
+ setTimeout(()=>o.classList.remove("show"),650);
+}
+
+function soundStart(){
+ beep(780,150,.24,0);
+ beep(1120,240,.27,170);
+}
+function soundRest(){
+ beep(520,180,.22,0);
+ beep(420,220,.20,190);
+}
+function soundNextExercise(){
+ beep(640,120,.22,0);
+ beep(840,150,.24,150);
+}
+function soundFinish(){
+ beep(760,150,.24,0);
+ beep(980,180,.26,180);
+ beep(1240,460,.30,400);
+}
+function soundCountdown(){
+ beep(760,120,.22,0);
+}
+
+
+function resetHistory(){
+ if(!confirm("¿Querés borrar todo el historial de entrenamientos? Esta acción no se puede deshacer.")) return;
+ localStorage.removeItem("hc_hist");
+ load();
+ if(typeof renderHistory==="function") renderHistory();
+ alert("Historial reiniciado.");
+}
+
+
+let tabHistory=["home"];
+
+function openTabSafe(tab){
+ try{
+   if(typeof showTab==="function"){
+     showTab(tab);
+   }else{
+     document.querySelectorAll(".tabPage").forEach(x=>x.classList.add("hidden"));
+     let target=el(tab) || el(tab+"Page");
+     if(target) target.classList.remove("hidden");
+   }
+   if(tabHistory[tabHistory.length-1]!==tab) tabHistory.push(tab);
+   window.scrollTo({top:0,behavior:"smooth"});
+ }catch(e){ console.error(e); }
+}
+
+
+
+
+
+
+function refreshAudioStatus(){
+ let s=el("audioStatus");
+ if(!s)return;
+ if(localStorage.getItem("hc_audio_unlocked")==="1"){
+   s.textContent="🔊 Sonido preparado. Si no se escucha, tocá “Activar sonido”.";
+ }
+}
+
+load();refreshAudioStatus();
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js?v=61").then(r=>r.update()).catch(()=>{});}
+</script>
+</body></html>
