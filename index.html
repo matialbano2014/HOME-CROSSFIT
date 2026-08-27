@@ -98,6 +98,8 @@ button,select{font:inherit}.btn{width:100%;border:0;border-radius:13px;padding:1
 .audioBtnRow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .audioBtn{border:0;border-radius:12px;padding:12px;font-weight:850;background:#1d252b;color:#fff}
 .audioBtn.primary{background:var(--accent);color:#071006}
+
+.countdownWord{font-size:92px!important;letter-spacing:-3px}
 </style>
 </head>
 <body><div id="countdownOverlay" class="countdownOverlay"><div id="countdownNumber" class="countdownNumber">3</div></div>
@@ -165,7 +167,7 @@ button,select{font:inherit}.btn{width:100%;border:0;border-radius:13px;padding:1
 <div class="row"><button class="btn secondary" onclick="swapExercise()">Cambiar ejercicio</button><button class="btn secondary" onclick="togglePause()" id="pause">Pausar</button></div>
 <button class="btn" onclick="finishWorkout()">Finalizar sesión</button>
 </div>
-</section>
+<button class="btn secondary" onclick="restartCurrentExercise()">↻ REINICIAR EJERCICIO</button></section>
 </main>
 <script>
 const plans={
@@ -281,8 +283,18 @@ function goBackTab(){
 function goHome(){
  if(currentTab!=="home") previousTabs.push(currentTab);
  currentTab="home";
- document.querySelectorAll('.tabPage').forEach(x=>x.classList.remove('active'));
- let page=el("home"); if(page) page.classList.add('active');
+ document.querySelectorAll('.tabPage').forEach(x=>{
+   x.style.display="";
+   x.classList.remove('active');
+ });
+ let page=el("home");
+ if(page){
+   page.style.display="";
+   page.classList.remove("hidden");
+   page.classList.add('active');
+ }
+ const nav=el("bottomNav");
+ if(nav) nav.style.display="flex";
  document.querySelectorAll('.navBtn').forEach(x=>x.classList.remove('active'));
  let first=document.querySelector('.navBtn'); if(first) first.classList.add('active');
  window.scrollTo(0,0);
@@ -316,14 +328,113 @@ function previewToday(){
  el("previewList").innerHTML=plans[day].ex.map((x,i)=>`<div style="padding:10px 0;border-bottom:1px solid #293039"><b>${i+1}. ${x}</b><div class="muted small">${(demoData[x]||{}).tip||""}</div></div>`).join("");
 }
 
+
+let wakeLock=null;
+let preStartTimer=null;
+let preStartActive=false;
+
+function speak(text){
+ try{
+   if(!("speechSynthesis" in window)) return;
+   window.speechSynthesis.cancel();
+   const u=new SpeechSynthesisUtterance(text);
+   u.lang="es-AR";
+   u.rate=1.0;
+   u.pitch=1.0;
+   u.volume=1.0;
+   window.speechSynthesis.speak(u);
+ }catch(e){}
+}
+
+async function requestWakeLock(){
+ try{
+   if("wakeLock" in navigator && document.visibilityState==="visible"){
+     wakeLock=await navigator.wakeLock.request("screen");
+   }
+ }catch(e){ wakeLock=null; }
+}
+
+async function releaseWakeLock(){
+ try{
+   if(wakeLock){ await wakeLock.release(); wakeLock=null; }
+ }catch(e){}
+}
+
+document.addEventListener("visibilitychange",()=>{
+ if(document.visibilityState==="visible" && running){
+   requestWakeLock();
+   const ctx=ensureAudioContext();
+   if(ctx && ctx.state==="suspended"){ try{ctx.resume();}catch(e){} }
+ }
+});
+
+function spokenCountdown(onDone){
+ if(preStartTimer) clearInterval(preStartTimer);
+ preStartActive=true;
+ let n=3;
+ const overlay=el("countdownOverlay");
+ const number=el("countdownNumber");
+
+ function showSpoken(value){
+   if(!overlay||!number)return;
+   number.classList.toggle("countdownWord", value==="¡YA!");
+   number.textContent=value;
+   number.style.animation="none"; void number.offsetWidth; number.style.animation="";
+   overlay.classList.add("show");
+ }
+ function step(){
+   if(n>0){
+     showSpoken(String(n));
+     speak(n===3?"Tres":n===2?"Dos":"Uno");
+     soundCountdown();
+     navigator.vibrate?.(70);
+     n--;
+   }else{
+     showSpoken("¡YA!");
+     speak("¡Ya!");
+     soundStart();
+     navigator.vibrate?.([100,60,180]);
+     clearInterval(preStartTimer);
+     preStartTimer=null;
+     setTimeout(()=>{
+       if(overlay) overlay.classList.remove("show");
+       if(number) number.classList.remove("countdownWord");
+       preStartActive=false;
+       if(onDone) onDone();
+     },650);
+   }
+ }
+ step();
+ preStartTimer=setInterval(step,900);
+}
+
+function restartCurrentExercise(){
+ if(!running || preStartActive) return;
+ paused=true;
+ spokenCountdown(()=>{
+   phase="work";
+   remaining=workTime();
+   paused=false;
+   show();
+ });
+}
+
 function startWorkout(){
+ requestWakeLock();
  const ctx=ensureAudioContext();
  if(ctx && ctx.state==="suspended"){ try{ctx.resume();}catch(e){} }
  audioUnlocked=!!ctx && ctx.state==="running";
 
  sessionMinutes=+el("duration").value; idx=0; phase="work"; remaining=workTime(); running=true; paused=false;
  document.querySelectorAll(".tabPage").forEach(x=>x.style.display="none");el("workout").classList.remove("hidden");el("bottomNav").style.display="none";show();
- clearInterval(timerId);timerId=setInterval(tick,1000); soundStart(); navigator.vibrate?.([100,70,180]);
+ clearInterval(timerId);paused=true;
+ spokenCountdown(()=>{
+   phase="work";
+   remaining=workTime();
+   paused=false;
+   show();
+ });
+ timerId=setInterval(tick,1000); soundStart(); navigator.vibrate?.([100,70,180]);
 }
 function workTime(){return mode==="easy"?20:mode==="hard"?30:20}
 function restTime(){return mode==="hard"?10:10}
@@ -381,15 +492,63 @@ function tick(){
 function togglePause(){paused=!paused;el("pause").textContent=paused?"Continuar":"Pausar"}
 function swapExercise(){idx++;show()}
 function finishWorkout(auto=false){
- clearInterval(timerId);running=false;
- if(!auto){soundFinish();navigator.vibrate?.([180,80,180,80,300]);}
+ releaseWakeLock();
+ if(preStartTimer){clearInterval(preStartTimer);preStartTimer=null;}
+ preStartActive=false;
+ try{window.speechSynthesis?.cancel();}catch(e){}
+ const co=el("countdownOverlay"); if(co)co.classList.remove("show");
+ clearInterval(timerId);
+ running=false;
+ paused=false;
+
+ if(!auto){
+   soundFinish();
+   navigator.vibrate?.([180,80,180,80,300]);
+ }
+
  let h=JSON.parse(localStorage.getItem("hc_hist")||"[]");
- h.push({date:new Date().toISOString().slice(0,10),mins:sessionMinutes,plan:plans[day].name});
+ h.push({
+   date:new Date().toISOString().slice(0,10),
+   mins:sessionMinutes,
+   plan:plans[day].name
+ });
  localStorage.setItem("hc_hist",JSON.stringify(h));
+
+ // Ocultar entrenamiento.
  el("workout").classList.add("hidden");
- el("home").classList.remove("hidden");
+
+ // IMPORTANTE iPhone/PWA:
+ // startWorkout() pone display:none en línea a las pestañas.
+ // Hay que borrar ese estilo antes de volver a Inicio.
+ document.querySelectorAll(".tabPage").forEach(x=>{
+   x.style.display="";
+   x.classList.remove("active");
+ });
+
+ const home=el("home");
+ if(home){
+   home.style.display="";
+   home.classList.remove("hidden");
+   home.classList.add("active");
+ }
+
+ // Restaurar navegación inferior.
+ const nav=el("bottomNav");
+ if(nav) nav.style.display="flex";
+
+ // Restablecer estado de navegación.
+ if(typeof currentTab!=="undefined") currentTab="home";
+ if(typeof previousTabs!=="undefined") previousTabs=[];
+
+ document.querySelectorAll(".navBtn").forEach(x=>x.classList.remove("active"));
+ const firstNav=document.querySelector(".navBtn");
+ if(firstNav) firstNav.classList.add("active");
+
  load();
- alert("Sesión registrada. Buen trabajo.");
+ if(typeof refreshAudioStatus==="function") refreshAudioStatus();
+ window.scrollTo(0,0);
+
+ setTimeout(()=>alert("Sesión registrada. Buen trabajo."),80);
 }
 let audioCtx=null;
 let audioUnlocked=false;
